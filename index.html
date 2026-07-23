@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechCare — Sistem Tempahan Perkhidmatan IT</title>
+<style>
+  :root{
+    --bg:#0f1220; --surface:#171a2e; --surface-2:#1f2440;
+    --border:#2a2f52; --text:#e8eaf6; --muted:#9aa0c7;
+    --primary:#6c8cff; --primary-2:#8b5cf6; --accent:#22d3ee;
+    --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#232a52 0,transparent 60%),var(--bg);
+    color:var(--text);min-height:100vh;line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none}
+  .container{max-width:1180px;margin:0 auto;padding:0 20px}
+
+  /* NAV */
+  header{position:sticky;top:0;z-index:50;background:rgba(15,18,32,.8);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem}
+  .logo{width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:grid;place-items:center;font-size:1.1rem}
+  .nav-links{display:flex;gap:6px;align-items:center}
+  .nav-links button{background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:.95rem;padding:9px 14px;border-radius:9px;transition:.2s;font-weight:600}
+  .nav-links button:hover{color:var(--text);background:var(--surface-2)}
+  .nav-links button.active{color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-2))}
+  .nav-admin-only { display: none; } /* Hidden by default for customers */
+
+  /* HERO */
+  .hero{padding:70px 0 40px;text-align:center}
+  .hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;
+    background:linear-gradient(120deg,#fff,#a9b6ff 60%,#22d3ee);
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:16px}
+  .hero p{color:var(--muted);max-width:620px;margin:0 auto 28px;font-size:1.08rem}
+  .cta{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .btn{border:none;cursor:pointer;font-weight:700;padding:13px 24px;border-radius:11px;
+    font-size:.98rem;transition:transform .15s,box-shadow .2s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 22px rgba(108,140,255,.35)}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
+  .btn-danger{background:rgba(248,113,113,.15);color:var(--danger);border:1px solid var(--danger);}
+
+  /* SERVICES */
+  .section{padding:44px 0}
+  .section h2{font-size:1.7rem;margin-bottom:8px}
+  .section .sub{color:var(--muted);margin-bottom:26px}
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px;transition:.25s}
+  .svc{cursor:pointer;position:relative;overflow:hidden}
+  .svc:hover{border-color:var(--primary);transform:translateY(-4px);box-shadow:var(--shadow)}
+  .svc.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+  .svc .ic{font-size:1.9rem;margin-bottom:12px}
+  .svc h3{font-size:1.12rem;margin-bottom:8px}
+  .svc p{color:var(--muted);font-size:.92rem;margin-bottom:14px}
+  .price{font-weight:800;color:var(--accent);font-size:1.15rem}
+  .badge{position:absolute;top:14px;right:14px;background:var(--surface-2);color:var(--accent);
+    font-size:.72rem;padding:4px 10px;border-radius:20px;font-weight:700;border:1px solid var(--border)}
+
+  /* FORM & BOOKING */
+  .booking-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start}
+  @media(max-width:860px){.booking-grid{grid-template-columns:1fr}}
+  label{display:block;font-size:.85rem;font-weight:600;margin:14px 0 6px;color:var(--muted)}
+  input,select,textarea{width:100%;background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text);padding:12px 14px;border-radius:10px;font-size:.95rem;font-family:inherit;transition:.2s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(108,140,255,.18)}
+  .field-err{border-color:var(--danger)!important}
+  .err-msg{color:var(--danger);font-size:.78rem;margin-top:5px;display:none}
+  .err-msg.show{display:block}
+
+  /* CALENDAR */
+  .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .cal-head button{background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+    width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:1.1rem}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal-grid .dow{text-align:center;color:var(--muted);font-size:.75rem;font-weight:700;padding:6px 0}
+  .day{aspect-ratio:1;display:grid;place-items:center;border-radius:9px;cursor:pointer;
+    font-size:.9rem;background:var(--surface-2);border:1px solid transparent;transition:.15s}
+  .day:hover:not(.disabled){border-color:var(--primary)}
+  .day.disabled{opacity:.28;cursor:not-allowed}
+  .day.empty{background:none;cursor:default}
+  .day.selected{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700}
+  .day.today{border-color:var(--accent)}
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .slot{background:var(--surface-2);border:1px solid var(--border);padding:9px;border-radius:9px;
+    text-align:center;cursor:pointer;font-size:.85rem;transition:.15s}
+  .slot:hover{border-color:var(--primary)}
+  .slot.selected{background:var(--accent);color:#062;font-weight:700}
+  .slot.taken{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+
+  .summary{background:var(--surface-2);border:1px dashed var(--border);border-radius:12px;padding:16px;margin-top:8px}
+  .summary .row{display:flex;justify-content:space-between;padding:6px 0;font-size:.92rem}
+  .summary .row span:first-child{color:var(--muted)}
+  .summary .total{border-top:1px solid var(--border);margin-top:8px;padding-top:12px;font-weight:800;font-size:1.05rem}
+
+  /* ADMIN */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:26px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .stat .n{font-size:1.9rem;font-weight:800}
+  .stat .l{color:var(--muted);font-size:.85rem;margin-top:4px}
+  .stat.a{border-left:3px solid var(--primary)}
+  .stat.b{border-left:3px solid var(--ok)}
+  .stat.c{border-left:3px solid var(--warn)}
+  .stat.d{border-left:3px solid var(--accent)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .toolbar input,.toolbar select{max-width:240px}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:12px;overflow:hidden; margin-bottom: 20px;}
+  th,td{text-align:left;padding:12px 14px;font-size:.9rem;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:700;background:var(--surface-2);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--surface-2)}
+  .tag{padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700;display:inline-block}
+  .t-pending{background:rgba(251,191,36,.15);color:var(--warn)}
+  .t-done{background:rgba(52,211,153,.15);color:var(--ok)}
+  .t-cancel{background:rgba(248,113,113,.15);color:var(--danger)}
+  .act{background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+    padding:5px 9px;border-radius:7px;cursor:pointer;font-size:.78rem;margin-right:4px}
+  .act:hover{border-color:var(--primary)}
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+
+  .view{display:none}
+  .view.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:var(--surface);border:1px solid var(--ok);color:var(--text);padding:14px 22px;
+    border-radius:12px;box-shadow:var(--shadow);z-index:100;transition:.35s;font-weight:600}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color:var(--muted);font-size:.85rem;margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="container">
+    <div class="brand"><div class="logo">🛠️</div> TechCare IT</div>
+    
+    <!-- Customer Navigation -->
+    <div class="nav-links" id="nav-customer">
+      <button class="active" data-view="home">Utama</button>
+      <button data-view="booking">Tempah</button>
+      <button onclick="loginAdmin()">Log Masuk Admin</button>
+    </div>
+    
+    <!-- Admin Navigation (Hidden initially) -->
+    <div class="nav-links nav-admin-only" id="nav-admin">
+      <button data-view="home">Lihat Laman Utama</button>
+      <button data-view="admin" class="active">Papan Pemuka</button>
+      <button data-view="admin-services">Urus Perkhidmatan</button>
+      <button onclick="logoutAdmin()" style="color: var(--danger)">Log Keluar</button>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== HOME ===== -->
+<main id="home" class="view active">
+  <section class="hero container">
+    <h1>Perkhidmatan Penyelenggaraan IT<br>Yang Boleh Anda Percayai</h1>
+    <p>Tempah perkhidmatan sokongan teknikal profesional dalam beberapa klik. Penyelenggaraan termal, pengurusan kabel rangkaian, persediaan pelayan dan banyak lagi.</p>
+    <div class="cta">
+      <button class="btn btn-primary" onclick="go('booking')">Tempah Sekarang</button>
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2>Pilihan Perkhidmatan</h2>
+    <p class="sub">Klik perkhidmatan untuk terus menempah.</p>
+    <div class="grid" id="svcGrid"></div>
+  </section>
+</main>
+
+<!-- ===== BOOKING (CUSTOMER ONLY) ===== -->
+<main id="booking" class="view">
+  <section class="section container">
+    <h2>Buat Tempahan</h2>
+    <p class="sub">Isikan maklumat, pilih tarikh & masa yang sesuai.</p>
+    <div class="booking-grid">
+      <!-- Left: form -->
+      <div class="card">
+        <label>Jenis Perkhidmatan *</label>
+        <select id="fService"></select>
+        <span class="err-msg" id="e-service">Sila pilih perkhidmatan.</span>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label>Nama Penuh *</label>
+            <input id="fName" placeholder="cth. Ahmad bin Ali">
+            <span class="err-msg" id="e-name">Sila masukkan nama.</span>
+          </div>
+          <div>
+            <label>No. Telefon *</label>
+            <input id="fPhone" placeholder="cth. 012-3456789">
+            <span class="err-msg" id="e-phone">Nombor telefon tidak sah.</span>
+          </div>
+        </div>
+
+        <label>E-mel *</label>
+        <input id="fEmail" placeholder="cth. ahmad@email.com">
+        <span class="err-msg" id="e-email">Alamat e-mel tidak sah.</span>
+
+        <label>Model / Jenis Peranti</label>
+        <input id="fDevice" placeholder="cth. ASUS ROG G16, Dell PowerEdge R750">
+
+        <label>Nota Tambahan</label>
+        <textarea id="fNote" rows="3" placeholder="Terangkan masalah atau keperluan khusus anda..."></textarea>
+
+        <div style="margin-top:20px">
+          <label>Tarikh Terpilih</label>
+          <div id="calHost"></div>
+        </div>
+
+        <label style="margin-top:16px">Slot Masa *</label>
+        <div class="slots" id="slotHost"></div>
+        <span class="err-msg" id="e-slot">Sila pilih tarikh & slot masa.</span>
+      </div>
+
+      <!-- Right: summary -->
+      <div class="card" style="position:sticky;top:86px">
+        <h3 style="margin-bottom:12px">Ringkasan Tempahan</h3>
+        <div class="summary">
+          <div class="row"><span>Perkhidmatan</span><span id="sSvc">—</span></div>
+          <div class="row"><span>Tarikh</span><span id="sDate">—</span></div>
+          <div class="row"><span>Masa</span><span id="sTime">—</span></div>
+          <div class="row"><span>Pelanggan</span><span id="sName">—</span></div>
+          <div class="row total"><span>Jumlah</span><span id="sTotal">RM 0</span></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="submitBooking()">Sahkan Tempahan</button>
+        <p style="color:var(--muted);font-size:.78rem;margin-top:10px;text-align:center">Data disimpan setempat dalam pelayar anda.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== ADMIN DASHBOARD (BOOKINGS) ===== -->
+<main id="admin" class="view">
+  <section class="section container">
+    <h2>Papan Pemuka Pentadbir</h2>
+    <p class="sub">Urus & pantau semua tempahan pelanggan.</p>
+
+    <div class="stats">
+      <div class="stat a"><div class="n" id="stTotal">0</div><div class="l">Jumlah Tempahan</div></div>
+      <div class="stat c"><div class="n" id="stPending">0</div><div class="l">Menunggu</div></div>
+      <div class="stat b"><div class="n" id="stDone">0</div><div class="l">Selesai</div></div>
+      <div class="stat d"><div class="n" id="stRevenue">RM 0</div><div class="l">Hasil (Selesai)</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" placeholder="🔍 Cari nama / e-mel...">
+      <select id="filterStatus">
+        <option value="">Semua Status</option>
+        <option value="pending">Menunggu</option>
+        <option value="done">Selesai</option>
+        <option value="cancel">Dibatalkan</option>
+      </select>
+      <button class="btn btn-ghost" style="padding:9px 16px" onclick="seedDemo()">Muat Data Contoh</button>
+      <button class="btn btn-danger" style="padding:9px 16px" onclick="clearAll()">Kosongkan Semua</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Pelanggan</th><th>Perkhidmatan</th><th>Tarikh & Masa</th><th>Harga</th><th>Status</th><th>Tindakan</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none">Tiada tempahan lagi.</div>
+  </section>
+</main>
+
+<!-- ===== ADMIN SERVICES (MANAGE SERVICES) ===== -->
+<main id="admin-services" class="view">
+  <section class="section container">
+    <h2>Urus Perkhidmatan</h2>
+    <p class="sub">Tambah perkhidmatan baharu atau buang perkhidmatan sedia ada.</p>
+
+    <div class="booking-grid">
+      <!-- Left: Add New Service Form -->
+      <div class="card">
+        <h3 style="margin-bottom:12px">Tambah Perkhidmatan Baharu</h3>
+        
+        <label>Nama Perkhidmatan *</label>
+        <input id="newSvcName" placeholder="cth. Format Laptop">
+        
+        <label>Penerangan Ringkas *</label>
+        <input id="newSvcDesc" placeholder="cth. Pemasangan semula Windows 11">
+
+        <label>Harga (RM) *</label>
+        <input id="newSvcPrice" type="number" placeholder="cth. 80">
+
+        <label>Ikon (Emoji) *</label>
+        <input id="newSvcIcon" placeholder="cth. 💻" value="💻">
+
+        <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="addNewService()">+ Tambah Perkhidmatan</button>
+      </div>
+
+      <!-- Right: List of Services -->
+      <div class="card">
+        <h3 style="margin-bottom:12px">Senarai Perkhidmatan Semasa</h3>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>Nama</th><th>Harga</th><th>Tindakan</th>
+            </tr></thead>
+            <tbody id="svcListBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<footer class="container">© 2026 TechCare IT — Sistem Tempahan Perkhidmatan Penyelenggaraan IT</footer>
+
+<script>
+/* ---------- DATA ---------- */
+// Default services in case nothing is saved[cite: 1]
+const DEFAULT_SERVICES = [
+  {id:'thermal', ic:'🌡️', name:'Penyelenggaraan Termal', desc:'Bersih habuk, tukar pes termal untuk laptop/PC berprestasi tinggi.', price:120, badge:'Popular'},
+  {id:'cable',   ic:'🔌', name:'Pengurusan Kabel Rangkaian', desc:'Susun & label kabel rangkaian dengan kemas dan teratur.', price:180},
+  {id:'server',  ic:'🖥️', name:'Persediaan Pelayan', desc:'Pemasangan & konfigurasi pelayan fizikal atau maya.', price:450, badge:'Pro'},
+  {id:'os',      ic:'💿', name:'Pemasangan Semula OS', desc:'Format & pasang semula sistem pengendalian + pemacu.', price:90},
+  {id:'network', ic:'📡', name:'Konfigurasi Rangkaian', desc:'Persediaan router, VLAN, firewall dan Wi-Fi pejabat.', price:220},
+  {id:'upgrade', ic:'⚡', name:'Naik Taraf Perkakasan', desc:'Pasang RAM, SSD, GPU dan uji kestabilan sistem.', price:150},
+];
+
+let servicesData = JSON.parse(localStorage.getItem('tc_services'));
+if(!servicesData || servicesData.length === 0) {
+    servicesData = DEFAULT_SERVICES;
+    localStorage.setItem('tc_services', JSON.stringify(servicesData));
+}
+
+const SLOTS = ['09:00','10:30','13:00','14:30','16:00','17:30'];
+const STATUS = {pending:'Menunggu', done:'Selesai', cancel:'Dibatalkan'};
+
+/* ---------- STATE ---------- */
+let bookings = JSON.parse(localStorage.getItem('tc_bookings')||'[]');
+let isAdmin = false;
+const sel = {service:null, date:null, slot:null};
+let calMonth = new Date().getMonth(), calYear = new Date().getFullYear();
+
+const saveBookings = ()=>localStorage.setItem('tc_bookings', JSON.stringify(bookings));
+const saveServices = ()=>localStorage.setItem('tc_services', JSON.stringify(servicesData));
+const money = n=>'RM '+n.toLocaleString('en-MY');
+const svcById = id=>servicesData.find(s=>s.id===id);
+
+/* ---------- NAV & AUTH ---------- */
+function go(v){
+  document.querySelectorAll('.view').forEach(m=>m.classList.toggle('active', m.id===v));
+  document.querySelectorAll('.nav-links button').forEach(b=>{
+    b.classList.remove('active');
+    if(b.dataset.view===v) b.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(v==='admin') renderAdmin();
+  if(v==='admin-services') renderAdminServices();
+}
+
+document.querySelectorAll('.nav-links button[data-view]').forEach(b=>b.onclick=()=>go(b.dataset.view));
+
+function loginAdmin() {
+    const pass = prompt("Sila masukkan kata laluan admin (Klu: wan123):");
+    if(pass === "wan123") {
+        isAdmin = true;
+        document.getElementById('nav-customer').style.display = 'none';
+        document.getElementById('nav-admin').style.display = 'flex';
+        go('admin');
+        toast("Berjaya log masuk sebagai admin.");
+    } else if (pass !== null) {
+        toast("Kata laluan salah!", true);
+    }
+}
+
+function logoutAdmin() {
+    isAdmin = false;
+    document.getElementById('nav-admin').style.display = 'none';
+    document.getElementById('nav-customer').style.display = 'flex';
+    go('home');
+    toast("Telah log keluar.");
+}
+
+/* ---------- HOME SERVICE CARDS ---------- */
+function renderServices(){
+  document.getElementById('svcGrid').innerHTML = servicesData.map(s=>`
+    <div class="card svc" onclick="pickAndBook('${s.id}')">
+      ${s.badge?`<span class="badge">${s.badge}</span>`:''}
+      <div class="ic">${s.ic}</div>
+      <h3>${s.name}</h3>
+      <p>${s.desc}</p>
+      <div class="price">${money(s.price)}</div>
+    </div>`).join('');
+}
+function pickAndBook(id){
+  document.getElementById('fService').value=id;
+  sel.service=id; updateSummary(); go('booking');
+}
+
+/* ---------- BOOKING FORM ---------- */
+function initServiceSelect(){
+  const el=document.getElementById('fService');
+  el.innerHTML='<option value="">— Pilih perkhidmatan —</option>'+
+    servicesData.map(s=>`<option value="${s.id}">${s.name} · ${money(s.price)}</option>`).join('');
+  el.onchange=()=>{sel.service=el.value; updateSummary();};
+}
+['fName','fPhone','fEmail'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updateSummary);
+});
+
+/* ---------- CALENDAR ---------- */
+const MONTHS=['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+const DOW=['Ahd','Isn','Sel','Rab','Kha','Jum','Sab'];
+function renderCalendar(){
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  let html=`<div class="cal-head">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <strong>${MONTHS[calMonth]} ${calYear}</strong>
+      <button onclick="shiftMonth(1)">›</button>
+    </div><div class="cal-grid">`;
+  DOW.forEach(d=>html+=`<div class="dow">${d}</div>`);
+  for(let i=0;i<first;i++) html+=`<div class="day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const date=new Date(calYear,calMonth,d); date.setHours(0,0,0,0);
+    const iso=date.toISOString().slice(0,10);
+    const past=date<today, isToday=+date===+today, isSel=sel.date===iso;
+    const dow=date.getDay(), weekend=(dow===0);
+    const dis=past||weekend;
+    html+=`<div class="day ${dis?'disabled':''} ${isToday?'today':''} ${isSel?'selected':''}"
+      ${dis?'':`onclick="pickDate('${iso}')"`}>${d}</div>`;
+  }
+  document.getElementById('calHost').innerHTML=html+'</div>';
+}
+function shiftMonth(n){calMonth+=n; if(calMonth<0){calMonth=11;calYear--} if(calMonth>11){calMonth=0;calYear++} renderCalendar();}
+function pickDate(iso){sel.date=iso; sel.slot=null; renderCalendar(); renderSlots(); updateSummary();}
+function renderSlots(){
+  const host=document.getElementById('slotHost');
+  if(!sel.date){host.innerHTML='<p style="color:var(--muted);font-size:.85rem;grid-column:1/-1">Pilih tarikh dahulu.</p>';return;}
+  const taken=bookings.filter(b=>b.date===sel.date&&b.status!=='cancel').map(b=>b.slot);
+  host.innerHTML=SLOTS.map(t=>{
+    const isTaken=taken.includes(t), isSel=sel.slot===t;
+    return `<div class="slot ${isTaken?'taken':''} ${isSel?'selected':''}"
+      ${isTaken?'':`onclick="pickSlot('${t}')"`}>${t}</div>`;
+  }).join('');
+}
+function pickSlot(t){sel.slot=t; renderSlots(); updateSummary();}
+
+/* ---------- SUMMARY ---------- */
+function updateSummary(){
+  const s=svcById(sel.service);
+  document.getElementById('sSvc').textContent=s?s.name:'—';
+  document.getElementById('sDate').textContent=sel.date?formatDate(sel.date):'—';
+  document.getElementById('sTime').textContent=sel.slot||'—';
+  document.getElementById('sName').textContent=document.getElementById('fName').value.trim()||'—';
+  document.getElementById('sTotal').textContent=s?money(s.price):'RM 0';
+}
+function formatDate(iso){const d=new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;}
+
+/* ---------- VALIDATION + SUBMIT ---------- */
+function setErr(field,show){
+  document.getElementById('f'+field.charAt(0).toUpperCase()+field.slice(1))?.classList.toggle('field-err',show);
+  document.getElementById('e-'+field)?.classList.toggle('show',show);
+}
+function submitBooking(){
+  const name=document.getElementById('fName').value.trim();
+  const phone=document.getElementById('fPhone').value.trim();
+  const email=document.getElementById('fEmail').value.trim();
+  let ok=true;
+  const svcOk=!!sel.service; document.getElementById('e-service').classList.toggle('show',!svcOk); if(!svcOk)ok=false;
+  const nameOk=name.length>=2; setErr('name',!nameOk); if(!nameOk)ok=false;
+  const phoneOk=/^[0-9+\-\s]{8,15}$/.test(phone); setErr('phone',!phoneOk); if(!phoneOk)ok=false;
+  const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); setErr('email',!emailOk); if(!emailOk)ok=false;
+  const slotOk=sel.date&&sel.slot; document.getElementById('e-slot').classList.toggle('show',!slotOk); if(!slotOk)ok=false;
+  if(!ok){toast('⚠️ Sila lengkapkan medan yang bertanda.',true);return;}
+
+  const s=svcById(sel.service);
+  bookings.push({
+    id:'TC'+Date.now().toString().slice(-6),
+    name, phone, email,
+    device:document.getElementById('fDevice').value.trim(),
+    note:document.getElementById('fNote').value.trim(),
+    service:s.id, serviceName:s.name, price:s.price,
+    date:sel.date, slot:sel.slot, status:'pending',
+    created:new Date().toISOString()
+  });
+  saveBookings();
+  toast('✅ Tempahan berjaya! ID: '+bookings[bookings.length-1].id);
+  resetForm();
+  
+  // Jika admin buat tempahan, kembali ke dashboard. Jika pelanggan, kembali ke laman utama.
+  setTimeout(()=>go(isAdmin ? 'admin' : 'home'),900);
+}
+function resetForm(){
+  ['fName','fPhone','fEmail','fDevice','fNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fService').value='';
+  sel.service=sel.date=sel.slot=null;
+  renderCalendar(); renderSlots(); updateSummary();
+}
+
+/* ---------- ADMIN (BOOKINGS) ---------- */
+function renderAdmin(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const fs=document.getElementById('filterStatus').value;
+  let rows=[...bookings].reverse().filter(b=>{
+    const matchQ=!q||b.name.toLowerCase().includes(q)||b.email.toLowerCase().includes(q)||b.id.toLowerCase().includes(q);
+    const matchS=!fs||b.status===fs;
+    return matchQ&&matchS;
+  });
+  
+  document.getElementById('stTotal').textContent=bookings.length;
+  document.getElementById('stPending').textContent=bookings.filter(b=>b.status==='pending').length;
+  document.getElementById('stDone').textContent=bookings.filter(b=>b.status==='done').length;
+  document.getElementById('stRevenue').textContent=money(bookings.filter(b=>b.status==='done').reduce((a,b)=>a+b.price,0));
+
+  const tb=document.getElementById('tbody');
+  document.getElementById('emptyState').style.display=rows.length?'none':'block';
+  tb.innerHTML=rows.map(b=>`
+    <tr>
+      <td><strong>${b.id}</strong></td>
+      <td>${b.name}<br><small style="color:var(--muted)">${b.email}</small></td>
+      <td>${b.serviceName}</td>
+      <td>${formatDate(b.date)}<br><small style="color:var(--muted)">${b.slot}</small></td>
+      <td>${money(b.price)}</td>
+      <td><span class="tag t-${b.status}">${STATUS[b.status]}</span></td>
+      <td style="white-space:nowrap">
+        ${b.status!=='done'?`<button class="act" onclick="setStatus('${b.id}','done')">✔ Selesai</button>`:''}
+        ${b.status!=='cancel'?`<button class="act" onclick="setStatus('${b.id}','cancel')">✖ Batal</button>`:''}
+        <button class="act" onclick="delBooking('${b.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+function setStatus(id,st){const b=bookings.find(x=>x.id===id); if(b){b.status=st;saveBookings();renderAdmin();toast('Status dikemas kini.');}}
+function delBooking(id){if(confirm('Padam tempahan ini?')){bookings=bookings.filter(x=>x.id!==id);saveBookings();renderAdmin();toast('Tempahan dipadam.');}}
+document.getElementById('search').addEventListener('input',renderAdmin);
+document.getElementById('filterStatus').addEventListener('change',renderAdmin);
+
+function clearAll(){if(confirm('Kosongkan SEMUA tempahan?')){bookings=[];saveBookings();renderAdmin();toast('Semua tempahan dikosongkan.');}}
+function seedDemo(){
+  const names=['Nurul Huda','Tan Wei Ming','Ahmad Firdaus','Priya Devi','Lim Chee Kong','Aisyah Rahman'];
+  const sts=['pending','done','done','pending','cancel','done'];
+  const base=new Date();
+  bookings=[]; 
+  for(let i=0;i<6;i++){
+    // Gunakan perkhidmatan dari data semasa (bukan dari original constant)
+    const s=servicesData[i%servicesData.length];
+    const d=new Date(base); d.setDate(base.getDate()+i+1);
+    bookings.push({
+      id:'TC'+(100000+i), name:names[i], phone:'01'+(2+i)+'-345678'+i,
+      email:names[i].toLowerCase().replace(/ /g,'.')+'@email.com',
+      device:'', note:'', service:s.id, serviceName:s.name, price:s.price,
+      date:d.toISOString().slice(0,10), slot:SLOTS[i%SLOTS.length],
+      status:sts[i], created:new Date().toISOString()
+    });
+  }
+  saveBookings(); renderAdmin(); toast('Data contoh dimuatkan.');
+}
+
+/* ---------- ADMIN (SERVICES) ---------- */
+function renderAdminServices() {
+    const tbody = document.getElementById('svcListBody');
+    tbody.innerHTML = servicesData.map(s => `
+        <tr>
+            <td><strong>${s.ic} ${s.name}</strong><br><small style="color:var(--muted)">${s.desc}</small></td>
+            <td>${money(s.price)}</td>
+            <td><button class="act" style="color:var(--danger); border-color:var(--danger)" onclick="deleteService('${s.id}')">🗑️ Buang</button></td>
+        </tr>
+    `).join('');
+}
+
+function addNewService() {
+    const name = document.getElementById('newSvcName').value.trim();
+    const desc = document.getElementById('newSvcDesc').value.trim();
+    const priceStr = document.getElementById('newSvcPrice').value.trim();
+    const icon = document.getElementById('newSvcIcon').value.trim() || '💻';
+
+    if(!name || !desc || !priceStr) {
+        toast("Sila lengkapkan semua maklumat perkhidmatan.", true);
+        return;
+    }
+
+    const price = parseFloat(priceStr);
+    const newId = 'svc_' + Date.now().toString().slice(-5);
+
+    servicesData.push({
+        id: newId,
+        ic: icon,
+        name: name,
+        desc: desc,
+        price: price
+    });
+
+    saveServices();
+    
+    // Refresh UI components
+    renderServices();
+    initServiceSelect();
+    renderAdminServices();
+    
+    // Clear form
+    document.getElementById('newSvcName').value = '';
+    document.getElementById('newSvcDesc').value = '';
+    document.getElementById('newSvcPrice').value = '';
+    
+    toast("Perkhidmatan baharu ditambah!");
+}
+
+function deleteService(id) {
+    if(confirm("Adakah anda pasti mahu memadam perkhidmatan ini?")) {
+        servicesData = servicesData.filter(s => s.id !== id);
+        saveServices();
+        
+        // Refresh UI components
+        renderServices();
+        initServiceSelect();
+        renderAdminServices();
+        
+        toast("Perkhidmatan telah dipadam.");
+    }
+}
+
+/* ---------- TOAST ---------- */
+let toastTimer;
+function toast(msg,warn){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=warn?'var(--danger)':'var(--ok)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ---------- INIT ---------- */
+renderServices();
+initServiceSelect();
+renderCalendar();
+renderSlots();
+updateSummary();
+</script>
+</body>
+</html>
