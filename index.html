@@ -374,7 +374,7 @@ function go(v){
 document.querySelectorAll('.nav-links button[data-view]').forEach(b=>b.onclick=()=>go(b.dataset.view));
 
 function loginAdmin() {
-    const pass = prompt("Sila masukkan kata laluan admin (Klu: wan123):");
+    const pass = prompt("Sila masukkan kata laluan admin:");
     if(pass === "wan123") {
         isAdmin = true;
         document.getElementById('nav-customer').style.display = 'none';
